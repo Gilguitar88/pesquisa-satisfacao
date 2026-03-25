@@ -10,15 +10,24 @@ const PERGUNTAS = [
   { id: 4, tipo: "texto",    texto: "O que podemos melhorar para atendê-lo melhor?" },
 ];
 
-const DADOS_DEMO = [
-  { id: 1, data: "2026-03-20", p1: 5, p2: 4, p3: "Atendimento rápido e eficiente!", p4: "Poderia ter mais opções de horário." },
-  { id: 2, data: "2026-03-21", p1: 4, p2: 5, p3: "Equipe muito atenciosa.", p4: "Nada a melhorar no momento." },
-  { id: 3, data: "2026-03-22", p1: 3, p2: 3, p3: "Serviço ok.", p4: "Melhorar o tempo de espera." },
-  { id: 4, data: "2026-03-23", p1: 5, p2: 5, p3: "Excelente experiência!", p4: "Continuar assim!" },
-  { id: 5, data: "2026-03-24", p1: 2, p2: 3, p3: "Regular.", p4: "Treinamento da equipe." },
-];
+const STORAGE_KEY = "pesquisa_respostas";
 
-let RESPOSTAS = [...DADOS_DEMO];
+function carregarRespostas() {
+  try {
+    const salvo = localStorage.getItem(STORAGE_KEY);
+    return salvo ? JSON.parse(salvo) : [];
+  } catch {
+    return [];
+  }
+}
+
+function salvarRespostas(lista) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+  } catch {
+    // silencia erros de storage
+  }
+}
 
 function Estrelas({ valor, onChange, readonly = false }) {
   const [hover, setHover] = useState(0);
@@ -65,7 +74,9 @@ function TelaPesquisa({ onVerAdmin }) {
     if (!respostas.p3.trim()) e.p3 = true;
     if (!respostas.p4.trim()) e.p4 = true;
     if (Object.keys(e).length) { setErros(e); return; }
-    RESPOSTAS = [...RESPOSTAS, { id: Date.now(), data: new Date().toISOString().split("T")[0], ...respostas }];
+    const nova = { id: Date.now(), data: new Date().toISOString().split("T")[0], ...respostas };
+    const lista = [...carregarRespostas(), nova];
+    salvarRespostas(lista);
     setEtapa("obrigado");
   };
 
@@ -79,10 +90,13 @@ function TelaPesquisa({ onVerAdmin }) {
           Sua opinião é muito importante para nós!
         </p>
         <div className="badge">🔒 Resposta confidencial garantida</div>
-        <button className="btn-secundario" style={{ marginTop: 24 }}
-          onClick={() => { setRespostas({ p1: 0, p2: 0, p3: "", p4: "" }); setEtapa("form"); }}>
-          Responder novamente
-        </button>
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 24, flexWrap: "wrap" }}>
+          <button className="btn-secundario"
+            onClick={() => { setRespostas({ p1: 0, p2: 0, p3: "", p4: "" }); setEtapa("form"); }}>
+            Responder novamente
+          </button>
+          <button className="btn-admin" onClick={onVerAdmin}>🔐 Admin</button>
+        </div>
       </div>
     </div>
   );
@@ -159,7 +173,7 @@ function TelaLogin({ onLogin, onVoltar }) {
 }
 
 function Dashboard({ onSair }) {
-  const [dados] = useState(() => [...RESPOSTAS]);
+  const [dados] = useState(() => carregarRespostas());
   const cores = ["#ef4444","#f97316","#eab308","#22c55e","#10b981"];
   const lbl = ["","★","★★","★★★","★★★★","★★★★★"];
 
