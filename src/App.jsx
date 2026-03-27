@@ -4,8 +4,8 @@ import "./App.css";
 const ADMIN_PASSWORD = "admin123";
 
 const PERGUNTAS = [
-  { id: 1, tipo: "estrelas", texto: "Como você avalia sua satisfação geral com nosso serviço?" },
-  { id: 2, tipo: "estrelas", texto: "Como você avalia o atendimento recebido?" },
+  { id: 1, tipo: "estrelas", texto: "Como você avalia o atendimento recebido?" },
+  { id: 2, tipo: "estrelas", texto: "Como você avalia sua satisfação geral com nosso serviço?" },
   { id: 3, tipo: "texto",    texto: "O que você mais gostou na sua experiência?" },
   { id: 4, tipo: "texto",    texto: "O que podemos melhorar para atendê-lo melhor?" },
 ];
@@ -172,6 +172,15 @@ function TelaLogin({ onLogin, onVoltar }) {
   );
 }
 
+const MESES_PT = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+
+function notaMes(media) {
+  if (media >= 4.5) return { cor: "#10b981", label: "Ótimo" };
+  if (media >= 3.5) return { cor: "#22c55e", label: "Bom" };
+  if (media >= 2.5) return { cor: "#eab308", label: "Regular" };
+  return { cor: "#ef4444", label: "Ruim" };
+}
+
 function Dashboard({ onSair }) {
   const [dados] = useState(() => carregarRespostas());
   const cores = ["#ef4444","#f97316","#eab308","#22c55e","#10b981"];
@@ -189,6 +198,28 @@ function Dashboard({ onSair }) {
     return { n, mediaP1, mediaP2, mediaGeral, distP1, distP2, pct };
   }, [dados]);
 
+  // Agrupamento mensal
+  const mensal = useMemo(() => {
+    const mapa = {};
+    dados.forEach(r => {
+      const [ano, mes] = r.data.split("-");
+      const chave = `${ano}-${mes}`;
+      if (!mapa[chave]) mapa[chave] = { chave, ano, mes, itens: [] };
+      mapa[chave].itens.push(r);
+    });
+    return Object.values(mapa)
+      .sort((a, b) => b.chave.localeCompare(a.chave))
+      .map(({ chave, ano, mes, itens }) => {
+        const n = itens.length;
+        const mediaAtend = (itens.reduce((s, r) => s + r.p1, 0) / n);
+        const mediaSat   = (itens.reduce((s, r) => s + r.p2, 0) / n);
+        const mediaGeral = ((mediaAtend + mediaSat) / 2);
+        const pct = Math.round((itens.filter(r => r.p1 >= 4 && r.p2 >= 4).length / n) * 100);
+        const mesNome = `${MESES_PT[parseInt(mes, 10) - 1]}/${ano}`;
+        return { chave, mesNome, n, mediaAtend: mediaAtend.toFixed(1), mediaSat: mediaSat.toFixed(1), mediaGeral: mediaGeral.toFixed(1), pct };
+      });
+  }, [dados]);
+
   return (
     <div className="card dash-card">
       <div className="dash-header">
@@ -200,15 +231,21 @@ function Dashboard({ onSair }) {
       </div>
 
       <div className="dash-body">
+
+        {/* ── Métricas gerais ── */}
         <div className="grid3">
           <div className="metrica purple"><p className="m-label">Total de Respostas</p><p className="m-valor">{m?.n ?? 0}</p><p className="m-sub">📋 respondentes</p></div>
           <div className="metrica green"><p className="m-label">Média Geral</p><p className="m-valor green-text">{m?.mediaGeral ?? "—"} <span style={{fontSize:18}}>★</span></p><p className="m-sub">de 5.0 possíveis</p></div>
           <div className="metrica blue"><p className="m-label">Clientes Satisfeitos</p><p className="m-valor blue-text">{m?.pct ?? 0}%</p><p className="m-sub">avaliaram ≥ 4 estrelas</p></div>
         </div>
 
+        {/* ── Distribuição por pergunta ── */}
         {m && (
           <div className="grid2">
-            {[{label:"Satisfação Geral", dist: m.distP1, media: m.mediaP1},{label:"Atendimento", dist: m.distP2, media: m.mediaP2}].map(({label,dist,media}) => (
+            {[
+              {label:"Atendimento",      dist: m.distP1, media: m.mediaP1},
+              {label:"Satisfação Geral", dist: m.distP2, media: m.mediaP2},
+            ].map(({label,dist,media}) => (
               <div key={label}>
                 <h3 className="secao-titulo">{label}</h3>
                 <div className="secao">
@@ -226,25 +263,85 @@ function Dashboard({ onSair }) {
           </div>
         )}
 
+        {/* ── Acompanhamento Mensal ── */}
+        <div className="secao">
+          <h3 className="secao-titulo">📅 Acompanhamento Mensal</h3>
+          {mensal.length === 0 ? (
+            <p style={{color:"#9ca3af", fontSize:14, textAlign:"center", padding:"12px 0"}}>Nenhuma resposta registrada ainda.</p>
+          ) : (
+            <div className="tabela-mensal-wrap">
+              <table className="tabela-mensal">
+                <thead>
+                  <tr>
+                    <th>Mês</th>
+                    <th>Respostas</th>
+                    <th>Atendimento</th>
+                    <th>Satisfação</th>
+                    <th>Média Geral</th>
+                    <th>Satisfeitos</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mensal.map(row => {
+                    const nota = notaMes(parseFloat(row.mediaGeral));
+                    return (
+                      <tr key={row.chave}>
+                        <td className="td-mes">{row.mesNome}</td>
+                        <td className="td-center">{row.n}</td>
+                        <td className="td-center td-star">{"★".repeat(Math.round(row.mediaAtend))} <span className="td-num">{row.mediaAtend}</span></td>
+                        <td className="td-center td-star">{"★".repeat(Math.round(row.mediaSat))} <span className="td-num">{row.mediaSat}</span></td>
+                        <td className="td-center">
+                          <div className="media-geral-cel">
+                            <span className="media-geral-val" style={{color: nota.cor}}>{row.mediaGeral}</span>
+                            <div className="mini-barra-bg">
+                              <div className="mini-barra-fill" style={{width:`${(parseFloat(row.mediaGeral)/5)*100}%`, background: nota.cor}} />
+                            </div>
+                          </div>
+                        </td>
+                        <td className="td-center">
+                          <span className="pct-badge" style={{background: row.pct >= 70 ? "#dcfce7" : row.pct >= 50 ? "#fef9c3" : "#fee2e2", color: row.pct >= 70 ? "#16a34a" : row.pct >= 50 ? "#92400e" : "#dc2626"}}>
+                            {row.pct}%
+                          </span>
+                        </td>
+                        <td className="td-center">
+                          <span className="status-badge" style={{background: nota.cor + "22", color: nota.cor}}>
+                            {nota.label}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* ── Comentários recentes ── */}
         <div className="secao">
           <h3 className="secao-titulo">💬 Comentários Recentes</h3>
-          <div className="comentarios">
-            {dados.slice(-6).reverse().map(r => (
-              <div key={r.id} className="comentario-card">
-                <div className="coment-top">
-                  <div className="coment-stars">
-                    <span>Satisfação: <strong style={{color:"#f59e0b"}}>{"★".repeat(r.p1)}</strong></span>
-                    <span>Atendimento: <strong style={{color:"#f59e0b"}}>{"★".repeat(r.p2)}</strong></span>
+          {dados.length === 0 ? (
+            <p style={{color:"#9ca3af", fontSize:14, textAlign:"center", padding:"12px 0"}}>Nenhuma resposta ainda.</p>
+          ) : (
+            <div className="comentarios">
+              {dados.slice(-6).reverse().map(r => (
+                <div key={r.id} className="comentario-card">
+                  <div className="coment-top">
+                    <div className="coment-stars">
+                      <span>Atendimento: <strong style={{color:"#f59e0b"}}>{"★".repeat(r.p1)}</strong></span>
+                      <span>Satisfação: <strong style={{color:"#f59e0b"}}>{"★".repeat(r.p2)}</strong></span>
+                    </div>
+                    <span className="coment-data">{r.data}</span>
                   </div>
-                  <span className="coment-data">{r.data}</span>
+                  <div className="coment-body">
+                    <div><p className="coment-cat green-cat">✅ O que mais gostou</p><p className="coment-text">{r.p3}</p></div>
+                    <div><p className="coment-cat purple-cat">🔧 O que melhorar</p><p className="coment-text">{r.p4}</p></div>
+                  </div>
                 </div>
-                <div className="coment-body">
-                  <div><p className="coment-cat green-cat">✅ O que mais gostou</p><p className="coment-text">{r.p3}</p></div>
-                  <div><p className="coment-cat purple-cat">🔧 O que melhorar</p><p className="coment-text">{r.p4}</p></div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <p className="rodape-privacidade">🔒 Todas as respostas são anônimas e confidenciais. Nenhum dado de identificação pessoal é coletado.</p>

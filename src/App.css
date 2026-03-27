@@ -181,6 +181,41 @@ body {
 .coment-text { font-size: 13px; color: #374151; line-height: 1.4; }
 .rodape-privacidade { text-align: center; font-size: 12px; color: #9ca3af; margin-top: 8px; }
 
+/* ── Tabela Mensal ──────────────────────────────────────────────── */
+.tabela-mensal-wrap { overflow-x: auto; }
+
+.tabela-mensal {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+}
+.tabela-mensal th {
+  background: #f3f4f6; color: #6b7280; font-weight: 700;
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+  padding: 10px 12px; text-align: center; border-bottom: 2px solid #e5e7eb;
+  white-space: nowrap;
+}
+.tabela-mensal td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+.tabela-mensal tr:last-child td { border-bottom: none; }
+.tabela-mensal tr:hover td { background: #fafafa; }
+
+.td-mes { font-weight: 700; color: #374151; white-space: nowrap; }
+.td-center { text-align: center; }
+.td-star { color: #f59e0b; white-space: nowrap; }
+.td-num { font-size: 11px; color: #6b7280; margin-left: 4px; }
+
+.media-geral-cel { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.media-geral-val { font-weight: 800; font-size: 15px; }
+.mini-barra-bg { width: 56px; height: 5px; background: #e5e7eb; border-radius: 99px; }
+.mini-barra-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+
+.pct-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 99px;
+  font-size: 12px; font-weight: 700;
+}
+.status-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 99px;
+  font-size: 12px; font-weight: 700;
+}
+
 @media (max-width: 600px) {
   .pagina { padding: 16px 12px 48px; }
   .grid3 { grid-template-columns: 1fr; }
