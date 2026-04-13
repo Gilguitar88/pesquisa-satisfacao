@@ -226,3 +226,82 @@ body {
   .perguntas { padding: 16px 20px 8px; }
   .card-footer { padding: 12px 20px 20px; }
 }
+
+/* ── Seleção de Médicos ─────────────────────────────────────────────── */
+.medicos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.medico-btn {
+  background: #f9fafb;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+  font-family: inherit;
+}
+.medico-btn:hover { border-color: #667eea; color: #667eea; background: #f0f0ff; }
+.medico-ativo {
+  border-color: #667eea !important;
+  background: linear-gradient(135deg, #667eea18, #764ba218) !important;
+  color: #667eea !important;
+  font-weight: 700 !important;
+}
+
+/* ── Opções de Avaliação ─────────────────────────────────────────────── */
+.opcoes-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.opcao-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #f9fafb;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 99px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.opcao-btn:hover { border-color: #9ca3af; }
+.opcao-ativa { font-weight: 700; }
+.opcao-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+/* ── Card laranja ─────────────────────────────────────────────────────── */
+.grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.metrica.orange { background: linear-gradient(135deg, #fff7ed, #ffedd5); }
+.orange-text { color: #ea580c; }
+
+/* ── Badge médico no comentário ──────────────────────────────────────── */
+.coment-medico {
+  font-weight: 700;
+  color: #374151;
+  background: #f3f4f6;
+  border-radius: 99px;
+  padding: 2px 10px;
+  font-size: 12px;
+}
+
+@media (max-width: 700px) {
+  .grid4 { grid-template-columns: repeat(2, 1fr); }
+  .medicos-grid { grid-template-columns: repeat(2, 1fr); }
+  .opcoes-row { flex-direction: column; }
+}
