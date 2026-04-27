@@ -84,7 +84,31 @@ function TelaPesquisa({ onVerAdmin }) {
           Sua resposta foi registrada de forma <strong>anônima e confidencial</strong>.
         </p>
         <div className="badge">🔒 Resposta confidencial garantida</div>
-        <div style={{ display:"flex", gap:12, justifyContent:"center", marginTop:24, flexWrap:"wrap" }}>
+
+        {/* Google Review */}
+        <div className="google-review-box">
+          <p className="google-review-titulo">⭐ Que tal nos avaliar no Google também?</p>
+          <p className="google-review-sub">
+            Sua avaliação pública nos ajuda a crescer e a atender ainda mais pessoas com carinho.
+            Leva menos de 1 minuto e faz uma grande diferença para nós! 💙
+          </p>
+          <img
+            src="https://api.qrserver.com/v1/create-qr-code/?data=https%3A%2F%2Fg.page%2Fr%2FCXWa1EWWNdl-EAE%2Freview&size=180x180&margin=6&color=1a1a2e"
+            alt="QR Code Google Review"
+            className="google-qr"
+          />
+          <p className="google-review-hint">📱 Aponte a câmera do celular para o QR code</p>
+          <a
+            href="https://g.page/r/CXWa1EWWNdl-EAE/review"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-google"
+          >
+            ⭐ Avaliar no Google
+          </a>
+        </div>
+
+        <div style={{ display:"flex", gap:12, justifyContent:"center", marginTop:20, flexWrap:"wrap" }}>
           <button className="btn-secundario"
             onClick={() => { setForm({ nome:"", medico:"", avalMedico:0, avalRecepcao:0, gostou:"", melhorar:"" }); setEtapa("form"); }}>
             Nova resposta
