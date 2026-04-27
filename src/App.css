@@ -80,6 +80,22 @@ body {
 .textarea:focus { border-color: #667eea; }
 .erro-msg { color: #ef4444; font-size: 12px; margin-top: 6px; }
 
+.input-nome {
+  width: 100%; border: 1.5px solid #e5e7eb; border-radius: 10px;
+  padding: 10px 14px; font-size: 14px; color: #374151;
+  outline: none; font-family: inherit; transition: border-color 0.2s;
+}
+.input-nome:focus { border-color: #667eea; }
+.opcional-tag {
+  font-size: 11px; font-weight: 400; color: #9ca3af;
+  background: #f3f4f6; border-radius: 20px; padding: 2px 8px;
+  margin-left: 8px; letter-spacing: 0.3px;
+}
+.coment-nome {
+  font-size: 13px; font-weight: 600; color: #6366f1;
+  background: #eef2ff; border-radius: 20px; padding: 2px 10px;
+}
+
 .card-footer {
   padding: 16px 28px 24px; display: flex; gap: 12px;
   justify-content: flex-end; align-items: center;

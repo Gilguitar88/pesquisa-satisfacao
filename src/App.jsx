@@ -39,7 +39,7 @@ function OpcaoAvaliacao({ valor, onChange }) {
 
 // ─── Tela da Pesquisa ──────────────────────────────────────────────────────────
 function TelaPesquisa({ onVerAdmin }) {
-  const [form, setForm] = useState({ medico:"", avalMedico:0, avalRecepcao:0, gostou:"", melhorar:"" });
+  const [form, setForm] = useState({ nome:"", medico:"", avalMedico:0, avalRecepcao:0, gostou:"", melhorar:"" });
   const [etapa, setEtapa] = useState("form");
   const [erros, setErros] = useState({});
   const [salvando, setSalvando] = useState(false);
@@ -86,7 +86,7 @@ function TelaPesquisa({ onVerAdmin }) {
         <div className="badge">🔒 Resposta confidencial garantida</div>
         <div style={{ display:"flex", gap:12, justifyContent:"center", marginTop:24, flexWrap:"wrap" }}>
           <button className="btn-secundario"
-            onClick={() => { setForm({ medico:"", avalMedico:0, avalRecepcao:0, gostou:"", melhorar:"" }); setEtapa("form"); }}>
+            onClick={() => { setForm({ nome:"", medico:"", avalMedico:0, avalRecepcao:0, gostou:"", melhorar:"" }); setEtapa("form"); }}>
             Nova resposta
           </button>
           <button className="btn-admin" onClick={onVerAdmin}>🔐 Admin</button>
@@ -109,6 +109,20 @@ function TelaPesquisa({ onVerAdmin }) {
       </div>
 
       <div className="perguntas">
+        {/* Nome – Opcional */}
+        <div className="bloco">
+          <p className="label">
+            Seu nome <span className="opcional-tag">(não obrigatório)</span>
+          </p>
+          <input
+            type="text"
+            className="input-nome"
+            placeholder="Digite seu nome (opcional)..."
+            value={form.nome}
+            onChange={e => set("nome", e.target.value)}
+          />
+        </div>
+
         {/* Q1 – Médico */}
         <div className={`bloco${erros.medico ? " bloco-erro" : ""}`}>
           <p className="label"><span className="num">1</span>Com qual doutor(a) você foi atendido(a)?</p>
@@ -400,6 +414,7 @@ function Dashboard({ onSair }) {
                       <div key={r.id} className="comentario-card">
                         <div className="coment-top">
                           <div className="coment-stars" style={{flexWrap:"wrap",gap:8}}>
+                            {r.nome && <span className="coment-nome">👤 {r.nome}</span>}
                             <span className="coment-medico">👨‍⚕️ {r.medico}</span>
                             <span>Médico: <strong style={{color:labelCor(r.avalMedico)}}>{valorParaLabel(r.avalMedico)}</strong></span>
                             <span>Recepção: <strong style={{color:labelCor(r.avalRecepcao)}}>{valorParaLabel(r.avalRecepcao)}</strong></span>
