@@ -251,6 +251,147 @@ function BarraMini({ valor, max, cor }) {
   );
 }
 
+// ─── Respostas Individuais ────────────────────────────────────────────────────
+const POR_PAGINA = 10;
+
+function RespostasIndividuais({ dados }) {
+  const [filtroMedico, setFiltroMedico] = useState("Todos");
+  const [filtroNota,   setFiltroNota]   = useState("Todas");
+  const [busca,        setBusca]        = useState("");
+  const [pagina,       setPagina]       = useState(1);
+  const [expandido,    setExpandido]    = useState(null);
+
+  const filtradas = useMemo(() => {
+    return [...dados].reverse().filter(r => {
+      const okMedico = filtroMedico === "Todos" || r.medico === filtroMedico;
+      const okNota   = filtroNota === "Todas"
+        || (filtroNota === "Excelente"  && r.avalMedico === 5)
+        || (filtroNota === "Muito bom"  && r.avalMedico === 4)
+        || (filtroNota === "Bom"        && r.avalMedico === 3)
+        || (filtroNota === "Regular"    && r.avalMedico === 2)
+        || (filtroNota === "Ruim"       && r.avalMedico === 1);
+      const q = busca.toLowerCase();
+      const okBusca = !q
+        || (r.nome    && r.nome.toLowerCase().includes(q))
+        || (r.gostou  && r.gostou.toLowerCase().includes(q))
+        || (r.melhorar && r.melhorar.toLowerCase().includes(q))
+        || (r.medico  && r.medico.toLowerCase().includes(q));
+      return okMedico && okNota && okBusca;
+    });
+  }, [dados, filtroMedico, filtroNota, busca]);
+
+  const totalPaginas = Math.ceil(filtradas.length / POR_PAGINA);
+  const paginadas    = filtradas.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
+
+  const resetPagina = () => setPagina(1);
+
+  return (
+    <div className="secao">
+      <h3 className="secao-titulo">📋 Respostas Individuais <span style={{fontWeight:400,color:"#9ca3af",fontSize:12}}>({filtradas.length} resultado{filtradas.length!==1?"s":""})</span></h3>
+
+      {/* Filtros */}
+      <div className="filtros-wrap">
+        <input
+          className="filtro-busca"
+          placeholder="🔍 Buscar por nome, médico ou comentário..."
+          value={busca}
+          onChange={e => { setBusca(e.target.value); resetPagina(); }}
+        />
+        <div className="filtros-row">
+          <select className="filtro-select" value={filtroMedico}
+            onChange={e => { setFiltroMedico(e.target.value); resetPagina(); }}>
+            <option value="Todos">Todos os médicos</option>
+            {MEDICOS.map(m => <option key={m} value={m}>{m}</option>)}
+          </select>
+          <select className="filtro-select" value={filtroNota}
+            onChange={e => { setFiltroNota(e.target.value); resetPagina(); }}>
+            <option value="Todas">Todas as notas</option>
+            {ESCALA.map(e => <option key={e.label} value={e.label}>{e.label}</option>)}
+          </select>
+          {(filtroMedico !== "Todos" || filtroNota !== "Todas" || busca) && (
+            <button className="btn-limpar" onClick={() => { setFiltroMedico("Todos"); setFiltroNota("Todas"); setBusca(""); resetPagina(); }}>
+              ✕ Limpar
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Lista */}
+      {filtradas.length === 0 ? (
+        <p style={{color:"#9ca3af",fontSize:14,textAlign:"center",padding:"20px 0"}}>Nenhuma resposta encontrada.</p>
+      ) : (
+        <>
+          <div className="respostas-lista">
+            {paginadas.map((r, i) => {
+              const aberta = expandido === r.id;
+              const notaM  = notaGeral(r.avalMedico);
+              const notaR  = notaGeral(r.avalRecepcao);
+              const idx    = (pagina - 1) * POR_PAGINA + i + 1;
+              return (
+                <div key={r.id} className={`resp-card${aberta ? " resp-aberta" : ""}`}>
+                  <button className="resp-header" onClick={() => setExpandido(aberta ? null : r.id)}>
+                    <div className="resp-header-left">
+                      <span className="resp-num">#{idx}</span>
+                      <div className="resp-info">
+                        <span className="resp-nome">{r.nome || <span style={{color:"#9ca3af",fontStyle:"italic"}}>Anônimo</span>}</span>
+                        <span className="resp-medico-tag">{r.medico}</span>
+                      </div>
+                    </div>
+                    <div className="resp-header-right">
+                      <span className="resp-nota-badge" style={{background:notaM.cor+"22",color:notaM.cor}}>
+                        Médico: {valorParaLabel(r.avalMedico)}
+                      </span>
+                      <span className="resp-nota-badge" style={{background:notaR.cor+"22",color:notaR.cor}}>
+                        Recepção: {valorParaLabel(r.avalRecepcao)}
+                      </span>
+                      <span className="resp-data">{r.data}</span>
+                      <span className="resp-chevron">{aberta ? "▲" : "▼"}</span>
+                    </div>
+                  </button>
+
+                  {aberta && (
+                    <div className="resp-body">
+                      <div className="resp-notas-grid">
+                        <div className="resp-nota-item">
+                          <p className="resp-nota-label">👨‍⚕️ Avaliação do Médico</p>
+                          <p className="resp-nota-valor" style={{color:notaM.cor}}>{valorParaLabel(r.avalMedico)} ({r.avalMedico}/5)</p>
+                        </div>
+                        <div className="resp-nota-item">
+                          <p className="resp-nota-label">📞 Avaliação da Recepção</p>
+                          <p className="resp-nota-valor" style={{color:notaR.cor}}>{valorParaLabel(r.avalRecepcao)} ({r.avalRecepcao}/5)</p>
+                        </div>
+                      </div>
+                      <div className="resp-comentarios-grid">
+                        <div className="resp-comentario">
+                          <p className="coment-cat green-cat">✅ O que mais gostou</p>
+                          <p className="coment-text">{r.gostou || <span style={{color:"#9ca3af"}}>—</span>}</p>
+                        </div>
+                        <div className="resp-comentario">
+                          <p className="coment-cat purple-cat">🔧 O que melhorar</p>
+                          <p className="coment-text">{r.melhorar || <span style={{color:"#9ca3af"}}>—</span>}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Paginação */}
+          {totalPaginas > 1 && (
+            <div className="paginacao">
+              <button className="pag-btn" disabled={pagina === 1} onClick={() => setPagina(p => p - 1)}>← Anterior</button>
+              <span className="pag-info">Página {pagina} de {totalPaginas}</span>
+              <button className="pag-btn" disabled={pagina === totalPaginas} onClick={() => setPagina(p => p + 1)}>Próxima →</button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 function Dashboard({ onSair }) {
   const [dados,    setDados]    = useState([]);
@@ -427,14 +568,14 @@ function Dashboard({ onSair }) {
               }
             </div>
 
-            {/* ── Comentários */}
+            {/* ── Comentários Recentes (resumo dos últimos 5) */}
             <div className="secao">
-              <h3 className="secao-titulo">💬 Comentários Recentes</h3>
+              <h3 className="secao-titulo">💬 Comentários Recentes <span style={{fontWeight:400,color:"#9ca3af",fontSize:12}}>(últimos 5)</span></h3>
               {dados.length === 0
                 ? <p style={{color:"#9ca3af",fontSize:14,textAlign:"center",padding:"12px 0"}}>Nenhuma resposta ainda.</p>
                 : (
                   <div className="comentarios">
-                    {[...dados].reverse().slice(0,8).map(r => (
+                    {[...dados].reverse().slice(0,5).map(r => (
                       <div key={r.id} className="comentario-card">
                         <div className="coment-top">
                           <div className="coment-stars" style={{flexWrap:"wrap",gap:8}}>
@@ -455,6 +596,9 @@ function Dashboard({ onSair }) {
                 )
               }
             </div>
+
+            {/* ── Respostas Individuais (TODAS) */}
+            {dados.length > 0 && <RespostasIndividuais dados={dados} />}
           </>
         )}
 
