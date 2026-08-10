@@ -7,8 +7,8 @@ import "./App.css";
 const ADMIN_PASSWORD = "admin123";
 
 const MEDICOS = [
-  "Dr. Arthur","Dra. Tayane","Dra. Lívia","Dra. Carol",
-  "Dr. Renato","Dr. Guilherme","Dr. Rafael","Dr. João","Dr. Danilo",
+  "Dra. Gabrielle","Dra. Tayane","Dra. Lívia","Dra. Carol",
+  "Dr. Renato","Dr. Gabriel","Dr. Rafael","Dr. João","Dr. Danilo",
 ];
 
 const ESCALA = [
